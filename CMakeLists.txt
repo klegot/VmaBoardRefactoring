@@ -68,6 +68,7 @@ target_link_libraries(${CMAKE_PROJECT_NAME}
     HydrodriversGPIO
     HydrolibBusDatalink 
     HydrolibBusApplication
+    HydrolibLogger
 
     # Add user defined libraries
 )

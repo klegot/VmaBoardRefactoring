@@ -114,7 +114,7 @@ target_sources(${CMAKE_PROJECT_NAME} PRIVATE
     ../../Core/Src/main.cpp
    # ../../Core/Src/myMain.cpp # Your C++ entry point
     ../../Core/Src/dshot.c
-    ../../Core/Src/dshot_a.c
+    ../../Core/Src/dshot_A.c
     ../../Core/Src/pwm.c
      # Add any other .c files from myCode if they exist
     # Add any other .cpp files from myCode if they exist

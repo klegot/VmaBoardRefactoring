@@ -5,22 +5,23 @@
     "version": "0.2.0",
     "configurations": [
         {
-            "name": "Cortex Debug f1",
+            "name": "Cortex Debug f4",
             "cwd": "${workspaceFolder}",
-            "executable": "${workspaceFolder}/build/Debug/Pressure_Sensor_SAUVC.elf",
+            "executable": "${workspaceFolder}/build/Debug/VMA_Board_SAUVC.elf",
             "request": "launch",
             "type": "cortex-debug",
             "runToEntryPoint": "main",
             "servertype": "openocd",
-            "device": "stm32f1x",
+            "device": "stm32f4x",
             "liveWatch": {
                 "enabled": true,
                 "samplesPerSecond": 4
             },
+            // "svdFile": "Drivers/Hydrodrivers/resources/STM32F407.svd",
             "showDevDebugOutput": "raw",
             "configFiles": [
                 "interface/stlink.cfg",
-                "target/stm32f1x.cfg"
+                "target/stm32f4x.cfg"
             ]
         },
         {

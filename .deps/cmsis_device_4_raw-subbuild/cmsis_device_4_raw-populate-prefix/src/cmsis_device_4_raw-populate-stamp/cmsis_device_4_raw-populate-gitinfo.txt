@@ -1,0 +1,15 @@
+# This is a generated file and its contents are an internal implementation detail.
+# The download step will be re-executed if anything in this file changes.
+# No other meaning or use of this file is supported.
+
+method=git
+command=/usr/local/bin/cmake;-P;/workspaces/VmaBoardRefactoring/.deps/cmsis_device_4_raw-subbuild/cmsis_device_4_raw-populate-prefix/tmp/cmsis_device_4_raw-populate-gitclone.cmake
+source_dir=/workspaces/VmaBoardRefactoring/.deps/cmsis_device_4_raw-src
+work_dir=/workspaces/VmaBoardRefactoring/.deps
+repository=https://github.com/STMicroelectronics/cmsis-device-f4.git
+remote=origin
+init_submodules=TRUE
+recurse_submodules=--recursive
+submodules=
+CMP0097=NEW
+

@@ -1,0 +1,46 @@
+{
+	"sources" : 
+	[
+		{
+			"file" : "/workspaces/VmaBoardRefactoring/.deps/cmsis_device_4_raw-subbuild/CMakeFiles/cmsis_device_4_raw-populate"
+		},
+		{
+			"file" : "/workspaces/VmaBoardRefactoring/.deps/cmsis_device_4_raw-subbuild/CMakeFiles/cmsis_device_4_raw-populate.rule"
+		},
+		{
+			"file" : "/workspaces/VmaBoardRefactoring/.deps/cmsis_device_4_raw-subbuild/CMakeFiles/cmsis_device_4_raw-populate-complete.rule"
+		},
+		{
+			"file" : "/workspaces/VmaBoardRefactoring/.deps/cmsis_device_4_raw-subbuild/cmsis_device_4_raw-populate-prefix/src/cmsis_device_4_raw-populate-stamp/cmsis_device_4_raw-populate-build.rule"
+		},
+		{
+			"file" : "/workspaces/VmaBoardRefactoring/.deps/cmsis_device_4_raw-subbuild/cmsis_device_4_raw-populate-prefix/src/cmsis_device_4_raw-populate-stamp/cmsis_device_4_raw-populate-configure.rule"
+		},
+		{
+			"file" : "/workspaces/VmaBoardRefactoring/.deps/cmsis_device_4_raw-subbuild/cmsis_device_4_raw-populate-prefix/src/cmsis_device_4_raw-populate-stamp/cmsis_device_4_raw-populate-download.rule"
+		},
+		{
+			"file" : "/workspaces/VmaBoardRefactoring/.deps/cmsis_device_4_raw-subbuild/cmsis_device_4_raw-populate-prefix/src/cmsis_device_4_raw-populate-stamp/cmsis_device_4_raw-populate-install.rule"
+		},
+		{
+			"file" : "/workspaces/VmaBoardRefactoring/.deps/cmsis_device_4_raw-subbuild/cmsis_device_4_raw-populate-prefix/src/cmsis_device_4_raw-populate-stamp/cmsis_device_4_raw-populate-mkdir.rule"
+		},
+		{
+			"file" : "/workspaces/VmaBoardRefactoring/.deps/cmsis_device_4_raw-subbuild/cmsis_device_4_raw-populate-prefix/src/cmsis_device_4_raw-populate-stamp/cmsis_device_4_raw-populate-patch.rule"
+		},
+		{
+			"file" : "/workspaces/VmaBoardRefactoring/.deps/cmsis_device_4_raw-subbuild/cmsis_device_4_raw-populate-prefix/src/cmsis_device_4_raw-populate-stamp/cmsis_device_4_raw-populate-test.rule"
+		},
+		{
+			"file" : "/workspaces/VmaBoardRefactoring/.deps/cmsis_device_4_raw-subbuild/cmsis_device_4_raw-populate-prefix/src/cmsis_device_4_raw-populate-stamp/cmsis_device_4_raw-populate-update.rule"
+		}
+	],
+	"target" : 
+	{
+		"labels" : 
+		[
+			"cmsis_device_4_raw-populate"
+		],
+		"name" : "cmsis_device_4_raw-populate"
+	}
+}

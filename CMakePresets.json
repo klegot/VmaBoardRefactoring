@@ -14,7 +14,7 @@
                 "BUILD_TESTS": "OFF",
                 "COVERAGE": "OFF",
                 "LOGGER_TYPE": "none",
-                "MCU_FAMILY": "F1",
+                "MCU_FAMILY": "F4",
                 "CMAKE_C_FLAGS": "-DSTM32F407xx",
                 "CMAKE_CXX_FLAGS": "-DSTM32F407xx"
             }

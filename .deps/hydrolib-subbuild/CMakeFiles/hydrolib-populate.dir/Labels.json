@@ -1,0 +1,46 @@
+{
+	"sources" : 
+	[
+		{
+			"file" : "/workspaces/VmaBoardRefactoring/.deps/hydrolib-subbuild/CMakeFiles/hydrolib-populate"
+		},
+		{
+			"file" : "/workspaces/VmaBoardRefactoring/.deps/hydrolib-subbuild/CMakeFiles/hydrolib-populate.rule"
+		},
+		{
+			"file" : "/workspaces/VmaBoardRefactoring/.deps/hydrolib-subbuild/CMakeFiles/hydrolib-populate-complete.rule"
+		},
+		{
+			"file" : "/workspaces/VmaBoardRefactoring/.deps/hydrolib-subbuild/hydrolib-populate-prefix/src/hydrolib-populate-stamp/hydrolib-populate-build.rule"
+		},
+		{
+			"file" : "/workspaces/VmaBoardRefactoring/.deps/hydrolib-subbuild/hydrolib-populate-prefix/src/hydrolib-populate-stamp/hydrolib-populate-configure.rule"
+		},
+		{
+			"file" : "/workspaces/VmaBoardRefactoring/.deps/hydrolib-subbuild/hydrolib-populate-prefix/src/hydrolib-populate-stamp/hydrolib-populate-download.rule"
+		},
+		{
+			"file" : "/workspaces/VmaBoardRefactoring/.deps/hydrolib-subbuild/hydrolib-populate-prefix/src/hydrolib-populate-stamp/hydrolib-populate-install.rule"
+		},
+		{
+			"file" : "/workspaces/VmaBoardRefactoring/.deps/hydrolib-subbuild/hydrolib-populate-prefix/src/hydrolib-populate-stamp/hydrolib-populate-mkdir.rule"
+		},
+		{
+			"file" : "/workspaces/VmaBoardRefactoring/.deps/hydrolib-subbuild/hydrolib-populate-prefix/src/hydrolib-populate-stamp/hydrolib-populate-patch.rule"
+		},
+		{
+			"file" : "/workspaces/VmaBoardRefactoring/.deps/hydrolib-subbuild/hydrolib-populate-prefix/src/hydrolib-populate-stamp/hydrolib-populate-test.rule"
+		},
+		{
+			"file" : "/workspaces/VmaBoardRefactoring/.deps/hydrolib-subbuild/hydrolib-populate-prefix/src/hydrolib-populate-stamp/hydrolib-populate-update.rule"
+		}
+	],
+	"target" : 
+	{
+		"labels" : 
+		[
+			"hydrolib-populate"
+		],
+		"name" : "hydrolib-populate"
+	}
+}

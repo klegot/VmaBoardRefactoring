@@ -1,0 +1,3 @@
+/workspaces/VmaBoardRefactoring/.deps/hydrolib-subbuild/CMakeFiles/hydrolib-populate.dir
+/workspaces/VmaBoardRefactoring/.deps/hydrolib-subbuild/CMakeFiles/edit_cache.dir
+/workspaces/VmaBoardRefactoring/.deps/hydrolib-subbuild/CMakeFiles/rebuild_cache.dir

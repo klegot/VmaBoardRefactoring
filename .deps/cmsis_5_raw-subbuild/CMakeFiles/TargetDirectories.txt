@@ -1,0 +1,3 @@
+/workspaces/VmaBoardRefactoring/.deps/cmsis_5_raw-subbuild/CMakeFiles/cmsis_5_raw-populate.dir
+/workspaces/VmaBoardRefactoring/.deps/cmsis_5_raw-subbuild/CMakeFiles/edit_cache.dir
+/workspaces/VmaBoardRefactoring/.deps/cmsis_5_raw-subbuild/CMakeFiles/rebuild_cache.dir
