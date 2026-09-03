@@ -1,3 +1,4 @@
-build
-mx.scratch
-!.settings
+build/*
+.deps/*
+.settings/
+build/Debug/CMakeFiles/Pressure_Sensor_SAUVC.dir/progress.make
