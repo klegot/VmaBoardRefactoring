@@ -1,6 +1,6 @@
 cmake_minimum_required(VERSION 3.22)
 # Enable CMake support for ASM and C languages
-enable_language(C ASM)
+enable_language(C ASM CXX)
 # 1. Enable C++ Standard (Required for your templates)
 set(CMAKE_CXX_STANDARD 20)
 set(CMAKE_CXX_STANDARD_REQUIRED ON)
