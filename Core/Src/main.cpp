@@ -106,6 +106,13 @@ constinit hydrv::GPIO::GPIOLow tx_pin1(hydrv::GPIO::GPIOLow::GPIOA_port, 9,
 constinit hydrv::UART::UART<255, 255>
     uart1(hydrv::UART::UARTLow::USART1_115200_LOW, rx_pin1, tx_pin1, 7);
 
+constinit hydrv::GPIO::GPIOLow rx_pin2(hydrv::GPIO::GPIOLow::GPIOD_port, 6,
+                                       hydrv::GPIO::GPIOLow::GPIO_UART_RX);
+constinit hydrv::GPIO::GPIOLow tx_pin2(hydrv::GPIO::GPIOLow::GPIOD_port, 5,
+                                       hydrv::GPIO::GPIOLow::GPIO_UART_TX);
+constinit hydrv::UART::UART<255, 255>
+    uart2(hydrv::UART::UARTLow::USART2_115200_LOW, rx_pin2, tx_pin2, 7);
+
 class Logger {
 public:
   Logger() = default;
@@ -215,6 +222,7 @@ int main(void) {
 
   NVIC_SetPriorityGrouping(0);
   uart1.Init();
+  uart2.Init();
 
   uint32_t last_50hz_time = 0;
   uint32_t last_100hz_time = 0;
@@ -323,6 +331,10 @@ extern "C" void HAL_ADC_ConvCpltCallback(ADC_HandleTypeDef *hadc) {
 
 extern "C" {
 void USART1_IRQHandler(void) { uart1.IRQCallback(); }
+}
+
+extern "C" {
+void USART2_IRQHandler(void) { uart2.IRQCallback(); }
 }
 
 extern "C" void Error_Handler(void) {
