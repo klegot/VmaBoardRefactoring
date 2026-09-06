@@ -32,7 +32,7 @@
 
 
 #include "dshot.h"
-#include <main.h>
+#include "main.h"
 
 
 // TIM1_UP - DMA2 Stream 5 - PA5, PA6

@@ -28,6 +28,19 @@ extern "C" {
 
 /* Includes ------------------------------------------------------------------*/
 #include "stm32f4xx_hal.h"
+#include <stdbool.h>
+#include <stdio.h>
+#include <string.h>
+#include <stdint.h>
+#include <stdlib.h>
+#include "adc.h"
+#include "dma.h"
+#include "dshot.h"
+#include "dshot_A.h"
+#include "gpio.h"
+#include "pwm.h"
+#include "tim.h"
+#include "usart.h"
 
 /* Private includes ----------------------------------------------------------*/
 /* USER CODE BEGIN Includes */

@@ -10,29 +10,16 @@
 /* Includes ------------------------------------------------------------------*/
 extern "C" {
 #include "main.h"
-#include "adc.h"
-#include "dma.h"
-#include "dshot.h"
-#include "dshot_A.h"
-#include "gpio.h"
-#include "pwm.h"
-#include "tim.h"
-#include "usart.h"
-#include <stdio.h>
-#include <string.h>
 }
 
 /* Private includes ----------------------------------------------------------*/
 /* USER CODE BEGIN Includes */
-#include <stdbool.h>
-#include <stdint.h>
-#include <stdlib.h>
 
 #include "hydrolib_bus_datalink_stream.hpp"
-#include "hydrolib_bus_application_master.hpp"
 #include "hydrolib_bus_application_slave.hpp"
 #include "hydrv_gpio_low.hpp"
 #include "hydrv_uart.hpp"
+#include "memory.hpp"
 #include <chrono>
 #include <cstring>
 #include <ctime>
@@ -55,49 +42,7 @@ int _gettimeofday(struct timeval *tv, void *tz) {
 
 /* Private variables ---------------------------------------------------------*/
 /* USER CODE BEGIN PV */
-extern "C" {
-extern UART_HandleTypeDef huart1;
-}
-#define BUFFER_LENGTH 20
 #define DSHOT_MAX_RPM 6000
-
-typedef struct {
-  uint16_t vbat1_adc;
-  uint16_t vbat2_adc;
-  bool killswitch_state;
-} BatteryData_t;
-
-float value = 0.0;
-uint16_t pwm_targets[4] = {1500, 1500, 1500, 1500};
-volatile float pid_target_speed_rpms[MOTORS_COUNT] = {0};
-uint8_t pid_target_speed_rpm_conversion[MOTORS_COUNT] = {0};
-uint8_t pwm_targets_conversion[4] = {150, 150, 150, 150};
-
-uint8_t pinState = 0;
-uint16_t adc_buffer[2];
-volatile bool battery_data_ready = false;
-BatteryData_t battery_data;
-
-class Memory {
-public:
-  hydrolib::ReturnCode Read(void *buffer, unsigned address, unsigned length) {
-    if (length + address > BUFFER_LENGTH)
-      return hydrolib::ReturnCode::FAIL;
-    memcpy(buffer, buffer_ + address, length);
-    return hydrolib::ReturnCode::OK;
-  }
-  hydrolib::ReturnCode Write(const void *buffer, unsigned address,
-                             unsigned length) {
-    if (address + length > BUFFER_LENGTH)
-      return hydrolib::ReturnCode::FAIL;
-    memcpy(buffer_ + address, buffer, length);
-    return hydrolib::ReturnCode::OK;
-  }
-  uint32_t Size() { return BUFFER_LENGTH; }
-
-private:
-  uint8_t buffer_[BUFFER_LENGTH] = {};
-};
 
 constinit hydrv::GPIO::GPIOLow rx_pin1(hydrv::GPIO::GPIOLow::GPIOA_port, 10,
                                        hydrv::GPIO::GPIOLow::GPIO_UART_RX);
@@ -119,32 +64,190 @@ public:
 };
 
 Logger logger;
-hydrolib::bus::datalink::StreamManager manager(1, uart1, logger);
+static inline Memory memory{};
 
-hydrolib::bus::datalink::Stream stream(manager, 2);
+static inline hydrolib::bus::datalink::StreamManager manager(1, uart1, logger);
+static inline hydrolib::bus::datalink::Stream stream(manager, 2);
+static inline hydrolib::bus::application::Slave slave(stream, memory, logger);
 
-Memory memory;
+MemoryMap system_data = {
+    .pid_target_speed_rpm_conversion = {0, 0, 0, 0, 0, 0, 0, 0, 0, 0},
+    .pwm_targets_conversion = {150, 150, 150, 150},
+    .vbat1_adc = 0,
+    .vbat2_adc = 0,
+    .killswitch_state = false};
 
-hydrolib::bus::application::Slave slave(stream, memory, logger);
+float value = 0.0;
+uint16_t pwm_targets[4] = {1500, 1500, 1500, 1500};
+volatile float pid_target_speed_rpms[MOTORS_COUNT] = {0};
 
-hydrolib::bus::application::Master master(stream, logger);
+uint8_t pinState = 0;
+uint16_t adc_buffer[2];
+volatile bool battery_data_ready = false;
 
-void getCommmands(void) {
-  memory.Read(&pid_target_speed_rpm_conversion, 0, 10);
-  memory.Read(&pwm_targets_conversion, 10, 4);
-  for (int i = 0; i < 10; i++) {
-    if (pid_target_speed_rpm_conversion[i] >= 100 &&
-        pid_target_speed_rpm_conversion[i] <= 200) {
-      int32_t signed_val = (int32_t)pid_target_speed_rpm_conversion[i] - 150;
-      pid_target_speed_rpms[i] = (float)signed_val * 120.0f;
-    }
+inline hydrolib::ReturnCode Memory::Read(void *read_buffer, int address,
+                                         int length) {
+  if (address < 0 || (address + length) > sizeof(MemoryMap)) {
+    return hydrolib::ReturnCode::FAIL;
   }
-  for (int i = 0; i < 4; i++) {
-    if (pwm_targets_conversion[i] >= 100 && pwm_targets_conversion[i] <= 200) {
-      pwm_targets[i] = (uint16_t)(pwm_targets_conversion[i] * 10);
+
+  switch (address) {
+  case offsetof(MemoryMap, pid_target_speed_rpm_conversion): {
+    memcpy(read_buffer, &system_data.pid_target_speed_rpm_conversion,
+           sizeof(system_data.pid_target_speed_rpm_conversion));
+    length -= sizeof(system_data.pid_target_speed_rpm_conversion);
+
+    for (int i = 0; i < 10; i++) {
+      if (system_data.pid_target_speed_rpm_conversion[i] >= 100 &&
+          system_data.pid_target_speed_rpm_conversion[i] <= 200) {
+        int32_t signed_val =
+            (int32_t)system_data.pid_target_speed_rpm_conversion[i] - 150;
+        pid_target_speed_rpms[i] = (float)signed_val * 120.0f;
+      }
     }
+    if (length > 0) {
+      void *next_buffer = static_cast<uint8_t *>(read_buffer) +
+                          sizeof(system_data.pid_target_speed_rpm_conversion);
+      return Read(next_buffer,
+                  address + sizeof(system_data.pid_target_speed_rpm_conversion),
+                  length);
+    }
+    break;
   }
+  case offsetof(MemoryMap, pwm_targets_conversion): {
+    memcpy(read_buffer, &system_data.pwm_targets_conversion,
+           sizeof(system_data.pwm_targets_conversion));
+    length -= sizeof(system_data.pwm_targets_conversion);
+
+    for (int i = 0; i < 4; i++) {
+      if (system_data.pwm_targets_conversion[i] >= 100 &&
+          system_data.pwm_targets_conversion[i] <= 200) {
+        pwm_targets[i] = (uint16_t)(system_data.pwm_targets_conversion[i] * 10);
+      }
+    }
+    if (length > 0) {
+      void *next_buffer = static_cast<uint8_t *>(read_buffer) +
+                          sizeof(system_data.pwm_targets_conversion);
+      return Read(next_buffer,
+                  address + sizeof(system_data.pwm_targets_conversion), length);
+    }
+    break;
+  }
+  case offsetof(MemoryMap, vbat1_adc): {
+    memcpy(read_buffer, &system_data.vbat1_adc, sizeof(system_data.vbat1_adc));
+    length -= sizeof(system_data.vbat1_adc);
+    if (length > 0) {
+      void *next_buffer =
+          static_cast<uint8_t *>(read_buffer) + sizeof(system_data.vbat1_adc);
+      return Read(next_buffer, address + sizeof(system_data.vbat1_adc), length);
+    }
+    break;
+  }
+  case offsetof(MemoryMap, vbat2_adc): {
+    memcpy(read_buffer, &system_data.vbat2_adc, sizeof(system_data.vbat2_adc));
+    length -= sizeof(system_data.vbat2_adc);
+    if (length > 0) {
+      void *next_buffer =
+          static_cast<uint8_t *>(read_buffer) + sizeof(system_data.vbat2_adc);
+      return Read(next_buffer, address + sizeof(system_data.vbat2_adc), length);
+    }
+    break;
+  }
+  case offsetof(MemoryMap, killswitch_state): {
+    memcpy(read_buffer, &system_data.killswitch_state,
+           sizeof(system_data.killswitch_state));
+    length -= sizeof(system_data.killswitch_state);
+    if (length > 0) {
+      void *next_buffer = static_cast<uint8_t *>(read_buffer) +
+                          sizeof(system_data.killswitch_state);
+      return Read(next_buffer, address + sizeof(system_data.killswitch_state),
+                  length);
+    }
+    break;
+  }
+
+  default:
+    return hydrolib::ReturnCode::FAIL;
+  }
+  return hydrolib::ReturnCode::OK;
 }
+
+inline hydrolib::ReturnCode Memory::Write(const void *write_buffer, int address,
+                                          int length) {
+  if (address < 0 || (address + length) > sizeof(MemoryMap)) {
+    return hydrolib::ReturnCode::FAIL;
+  }
+
+  switch (address) {
+  case offsetof(MemoryMap, pid_target_speed_rpm_conversion): {
+    memcpy(&system_data.pid_target_speed_rpm_conversion, write_buffer,
+           sizeof(system_data.pid_target_speed_rpm_conversion));
+    length -= sizeof(system_data.pid_target_speed_rpm_conversion);
+    if (length > 0) {
+      const void *next_buffer =
+          static_cast<const uint8_t *>(write_buffer) +
+          sizeof(system_data.pid_target_speed_rpm_conversion);
+      return Write(next_buffer,
+                   address +
+                       sizeof(system_data.pid_target_speed_rpm_conversion),
+                   length);
+    }
+    break;
+  }
+  case offsetof(MemoryMap, pwm_targets_conversion): {
+    memcpy(&system_data.pwm_targets_conversion, write_buffer,
+           sizeof(system_data.pwm_targets_conversion));
+    length -= sizeof(system_data.pwm_targets_conversion);
+    if (length > 0) {
+      const void *next_buffer = static_cast<const uint8_t *>(write_buffer) +
+                                sizeof(system_data.pwm_targets_conversion);
+      return Write(next_buffer,
+                   address + sizeof(system_data.pwm_targets_conversion),
+                   length);
+    }
+    break;
+  }
+  case offsetof(MemoryMap, vbat1_adc): {
+    memcpy(&system_data.vbat1_adc, write_buffer, sizeof(system_data.vbat1_adc));
+    length -= sizeof(system_data.vbat1_adc);
+    if (length > 0) {
+      const void *next_buffer = static_cast<const uint8_t *>(write_buffer) +
+                                sizeof(system_data.vbat1_adc);
+      return Write(next_buffer, address + sizeof(system_data.vbat1_adc),
+                   length);
+    }
+    break;
+  }
+  case offsetof(MemoryMap, vbat2_adc): {
+    memcpy(&system_data.vbat2_adc, write_buffer, sizeof(system_data.vbat2_adc));
+    length -= sizeof(system_data.vbat2_adc);
+    if (length > 0) {
+      const void *next_buffer = static_cast<const uint8_t *>(write_buffer) +
+                                sizeof(system_data.vbat2_adc);
+      return Write(next_buffer, address + sizeof(system_data.vbat2_adc),
+                   length);
+    }
+    break;
+  }
+  case offsetof(MemoryMap, killswitch_state): {
+    memcpy(&system_data.killswitch_state, write_buffer,
+           sizeof(system_data.killswitch_state));
+    length -= sizeof(system_data.killswitch_state);
+    if (length > 0) {
+      const void *next_buffer = static_cast<const uint8_t *>(write_buffer) +
+                                sizeof(system_data.killswitch_state);
+      return Write(next_buffer, address + sizeof(system_data.killswitch_state),
+                   length);
+    }
+    break;
+  }
+  default:
+    return hydrolib::ReturnCode::FAIL;
+  }
+
+  return hydrolib::ReturnCode::OK;
+}
+
 /* USER CODE END PV */
 
 /* Private function prototypes -----------------------------------------------*/
@@ -158,19 +261,9 @@ void quick_battery_read(void);
 /* Private user code ---------------------------------------------------------*/
 void adc_start(void) { HAL_ADC_Start_DMA(&hadc1, (uint32_t *)adc_buffer, 2); }
 
-void ByteProtocol_TX_SendBatteryData(const BatteryData_t *data) {
-  uint8_t tx_buffer_bat[5];
-  tx_buffer_bat[0] = data->vbat1_adc & 0xFF;
-  tx_buffer_bat[1] = (data->vbat1_adc >> 8) & 0xFF;
-  tx_buffer_bat[2] = data->vbat2_adc & 0xFF;
-  tx_buffer_bat[3] = (data->vbat2_adc >> 8) & 0xFF;
-  tx_buffer_bat[4] = data->killswitch_state ? 0x01 : 0x00;
-  memory.Write(tx_buffer_bat, 14, 5);
-}
-
 void quick_battery_read(void) {
-  battery_data.vbat1_adc = adc_buffer[0];
-  battery_data.vbat2_adc = adc_buffer[1];
+  system_data.vbat1_adc = adc_buffer[0];
+  system_data.vbat2_adc = adc_buffer[1];
 }
 
 void calibration(void) {
@@ -211,7 +304,6 @@ int main(void) {
   MX_TIM9_Init();
   MX_TIM12_Init();
   MX_ADC1_Init();
-  MX_USART1_UART_Init();
 
   PWM_Init();
   adc_start();
@@ -220,13 +312,12 @@ int main(void) {
   pid_reset_all();
   calibration();
 
-  NVIC_SetPriorityGrouping(0);
+  //NVIC_SetPriorityGrouping(0);
   uart1.Init();
   uart2.Init();
 
   uint32_t last_50hz_time = 0;
   uint32_t last_100hz_time = 0;
-  uint32_t last_battery_tx = 0;
   uint16_t count = 0;
   uint16_t err = 0;
 
@@ -234,17 +325,12 @@ int main(void) {
   GPIOC->MODER |= GPIO_MODER_MODER14_0;
 
   while (1) {
-    battery_data.killswitch_state = (GPIOA->IDR & GPIO_PIN_3) ? true : false;
-    if (pinState == 0 && battery_data.killswitch_state == 1) {
+    system_data.killswitch_state = (GPIOA->IDR & GPIO_PIN_3) ? true : false;
+    if (pinState == 0 && system_data.killswitch_state == 1) {
       HAL_Delay(200);
       calibration();
-      pinState = battery_data.killswitch_state;
+      pinState = system_data.killswitch_state;
     }
-
-    manager.Process();
-    slave.Process();
-    master.Process();
-    getCommmands();
 
     if (battery_data_ready) {
       quick_battery_read();
@@ -292,11 +378,6 @@ int main(void) {
       PWM_SetDuty(&htim12, TIM_CHANNEL_2, pwm_targets[3]);
       last_100hz_time = now2;
     }
-
-    if (now2 - last_battery_tx >= 100) {
-      ByteProtocol_TX_SendBatteryData(&battery_data);
-      last_battery_tx = now2;
-    }
   }
 }
 
@@ -330,11 +411,19 @@ extern "C" void HAL_ADC_ConvCpltCallback(ADC_HandleTypeDef *hadc) {
 }
 
 extern "C" {
-void USART1_IRQHandler(void) { uart1.IRQCallback(); }
+void USART1_IRQHandler(void) {
+  uart1.IRQCallback();
+  manager.Process();
+  slave.Process();
+}
 }
 
 extern "C" {
-void USART2_IRQHandler(void) { uart2.IRQCallback(); }
+void USART2_IRQHandler(void) {
+  uart2.IRQCallback();
+  manager.Process();
+  slave.Process();
+}
 }
 
 extern "C" void Error_Handler(void) {
