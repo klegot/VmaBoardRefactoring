@@ -18,5 +18,6 @@
 
 void PWM_Init(void);
 void PWM_SetDuty(TIM_HandleTypeDef *htim, uint32_t channel, uint16_t pulse_us);
+void PWM_FLASH_SetDuty(TIM_HandleTypeDef *htim, uint32_t channel, uint16_t pulse_us);
 
 #endif // __PWM_H__
