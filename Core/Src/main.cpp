@@ -167,6 +167,16 @@ inline hydrolib::ReturnCode Memory::Write(const void *write_buffer, int address,
     memcpy(&system_data.pid_target_speed_rpm_conversion, write_buffer,
            sizeof(system_data.pid_target_speed_rpm_conversion));
     length -= sizeof(system_data.pid_target_speed_rpm_conversion);
+
+    for (int i = 0; i < 10; i++) {
+      if (system_data.pid_target_speed_rpm_conversion[i] >= 100 &&
+          system_data.pid_target_speed_rpm_conversion[i] <= 200) {
+        int32_t signed_val =
+            (int32_t)system_data.pid_target_speed_rpm_conversion[i] - 150;
+        pid_target_speed_rpms[i] = (float)signed_val * 120.0f;
+      }
+    }
+
     if (length > 0) {
       const void *next_buffer =
           static_cast<const uint8_t *>(write_buffer) +
@@ -182,6 +192,14 @@ inline hydrolib::ReturnCode Memory::Write(const void *write_buffer, int address,
     memcpy(&system_data.pwm_targets_conversion, write_buffer,
            sizeof(system_data.pwm_targets_conversion));
     length -= sizeof(system_data.pwm_targets_conversion);
+
+    for (int i = 0; i < 4; i++) {
+      if (system_data.pwm_targets_conversion[i] >= 0 &&
+          system_data.pwm_targets_conversion[i] <= 500) {
+        pwm_targets[i] = (uint16_t)(system_data.pwm_targets_conversion[i] * 10);
+      }
+    }
+
     if (length > 0) {
       const void *next_buffer = static_cast<const uint8_t *>(write_buffer) +
                                 sizeof(system_data.pwm_targets_conversion);
@@ -314,22 +332,6 @@ int main(void) {
       calibration();
       HAL_Delay(200);
       pinState = system_data.killswitch_state;
-    }
-
-    for (int i = 0; i < 10; i++) {
-      if (system_data.pid_target_speed_rpm_conversion[i] >= 100 &&
-          system_data.pid_target_speed_rpm_conversion[i] <= 200) {
-        int32_t signed_val =
-            (int32_t)system_data.pid_target_speed_rpm_conversion[i] - 150;
-        pid_target_speed_rpms[i] = (float)signed_val * 120.0f;
-      }
-    }
-
-    for (int i = 0; i < 4; i++) {
-      if (system_data.pwm_targets_conversion[i] >= 100 &&
-          system_data.pwm_targets_conversion[i] <= 200) {
-        pwm_targets[i] = (uint16_t)(system_data.pwm_targets_conversion[i] * 10);
-      }
     }
 
     if (battery_data_ready) {

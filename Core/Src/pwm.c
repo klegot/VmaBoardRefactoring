@@ -32,7 +32,7 @@ void PWM_SetDuty(TIM_HandleTypeDef *htim, uint32_t channel, uint16_t pulse_us)
 
 void PWM_FLASH_SetDuty(TIM_HandleTypeDef *htim, uint32_t channel, uint16_t pulse_us)
 {
-    if (pulse_us > 2500) pulse_us = 2500;
+    if (pulse_us > 5000) pulse_us = 5000;
     __HAL_TIM_SET_COMPARE(htim, channel, pulse_us);
 }
 
